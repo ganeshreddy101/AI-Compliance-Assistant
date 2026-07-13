@@ -322,7 +322,7 @@ for message in st.session_state.messages:
 
             if "chunks" in message:
 
-                with st.expander("📄 Retrieved Chunks"):
+                with st.expander("📚 Retrieved Evidence"):
 
                     for chunk in message["chunks"]:
 
@@ -389,7 +389,6 @@ if question:
                 chat_history,
                 st.session_state.chat_id
             )
-            
             answer = response["answer"]
             
             st.markdown(answer)
@@ -413,7 +412,7 @@ if question:
 
             if response["chunks"]:
 
-                with st.expander("📄 Retrieved Chunks"):
+                with st.expander("📚 Retrieved Evidence"):
 
                     for chunk in response["chunks"]:
 
