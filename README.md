@@ -28,17 +28,17 @@ The application supports **multiple independent chat sessions**, allowing users 
 
 ### Main Interface
 
-> Retrieved evidence showing the supporting document chunks used to generate the response.
+> The main interface demonstrating multi-chat support, PDF management, grounded responses.
 
-![Main UI](images/main_ui.png)
+![Retrieved Chunks](images/retrieved_chunks.png)
 
 ---
 
 ### Retrieved Chunks
 
-> The main interface demonstrating multi-chat support, PDF management, grounded responses.
+> Retrieved evidence showing the supporting document chunks used to generate the response.
 
-![Retrieved Chunks](images/retrieved_chunks.png)
+![Main UI](images/main_ui.png)
 
 ---
 
