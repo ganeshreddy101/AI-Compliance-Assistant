@@ -26,75 +26,94 @@ The application supports **multiple independent chat sessions**, allowing users 
 
 ## 📸 Demo
 
-### Main Interface
+### 🏠 Main Dashboard
 
-> The main interface demonstrating multi-chat support, PDF management, grounded responses.
+The main interface demonstrating multi-chat support, PDF management, and AI-generated responses.
 
-![Retrieved Chunks](images/retrieved_chunks.png)
+<p align="center">
+  <img src="images/main_dashboard.png" width="900">
+</p>
 
 ---
 
-### Retrieved Chunks
+### 📚 Retrieved Evidence
 
-> Retrieved evidence showing the supporting document chunks used to generate the response.
+Displays the supporting document chunks retrieved by the Hybrid RAG pipeline before answer generation.
 
-![Main UI](images/main_ui.png)
+<p align="center">
+  <img src="images/retrieved_evidence.png" width="900">
+</p>
+
+---
+
+### 📊 Performance Metrics
+
+Shows retrieval statistics and execution metrics to help evaluate system performance.
+
+<p align="center">
+  <img src="images/performance_metrics.png" width="900">
+</p>
 
 ---
 
 ## 🏗️ Architecture
 
-```
-                    User
-                      │
-                      ▼
-             Streamlit Frontend
-                      │
-        ┌─────────────┴─────────────┐
-        │                           │
-        ▼                           ▼
- Chat Management              PDF Upload
-(SQLite Database)                  │
-                                    ▼
-                             Text Chunking
-                                    │
-                                    ▼
-                       HuggingFace Embeddings
-                                    │
-                                    ▼
-                              FAISS Vector DB
-                                    │
-                     ┌──────────────┴──────────────┐
-                     ▼                             ▼
-                 BM25 Search                FAISS Search
-                     │                             │
-                     └──────────Hybrid Search──────┘
-                                    │
-                                    ▼
-                       CrossEncoder Reranker
-                                    │
-                                    ▼
-                              Groq LLM
-                                    │
-                                    ▼
-                         Answer + Citations
+```text
+                           User
+                             │
+                             ▼
+                    Streamlit Frontend
+                             │
+         ┌───────────────────┴───────────────────┐
+         │                                       │
+         ▼                                       ▼
+  Chat Management                         PDF Upload
+ (SQLite Database)                             │
+                                                ▼
+                                     PyMuPDF Text Extraction
+                                                │
+                                                ▼
+                                  Recursive Text Chunking
+                                                │
+                                                ▼
+                          HuggingFace Embeddings (MiniLM)
+                                                │
+                           ┌────────────────────┴────────────────────┐
+                           ▼                                         ▼
+                    FAISS Vector Store                        BM25 Index
+                           │                                         │
+                           └────────────── Hybrid Retrieval ──────────┘
+                                              │
+                                              ▼
+                                  Cross-Encoder Re-ranking
+                                              │
+                                              ▼
+                                  Conversation Memory
+                                              │
+                                              ▼
+                                  Llama 3.3 (Groq API)
+                                              │
+                     ┌────────────────────────┴────────────────────────┐
+                     ▼                                                 ▼
+             AI Generated Answer                         Retrieved Evidence
+                                                          + Performance Metrics
 ```
 
 ---
 
 ## 🛠️ Tech Stack
-
-### Frontend
-
-- Streamlit
-
-### Backend
-
-- Python
-
-### Database
-
-- SQLite
+| Category        | Technology |
+|-----------------|------------|
+| Frontend        | Streamlit 
+| Backend         | Python 
+| LLM             | Llama 3.3 (Groq) 
+| Framework       | LangChain 
+| Vector Database | FAISS 
+| Retrieval       | BM25 
+| Re-ranking      | Cross Encoder 
+| Embeddings      | all-MiniLM-L6-v2 
+| Database        | SQLite 
+| PDF Processing  | PyMuPDF 
 
 ### RAG Pipeline
 
@@ -107,14 +126,14 @@ The application supports **multiple independent chat sessions**, allowing users 
 ### LLM
 
 - Groq
-- Qwen
+- Llama 3.3 70B
 
 ### Libraries
 
 - Sentence Transformers
 - Transformers
 - Scikit-Learn
-- PyPDF
+- PyMuPDF
 
 ---
 
@@ -135,6 +154,34 @@ AI-Compliance-Assistant/
 │
 └── tests/
 ```
+
+---
+
+## ⚡ Performance Improvements
+
+| Metric | Before | After |
+|---------|--------|-------|
+| PDF Processing | Docling | PyMuPDF |
+| Processing Time | 75.34 s | 0.46 s |
+| Improvement | — | **~164× Faster** |
+
+---
+
+## 📈 Evaluation
+
+The system was evaluated on **80 benchmark questions** across multiple AI compliance documents.
+
+### Documents
+
+- NIST AI Risk Management Framework
+- OECD AI Principles
+- Executive Order on Removing Barriers to American Leadership in Artificial Intelligence
+
+### Results
+
+- ✅ 80 benchmark questions evaluated
+- ✅ 0 incorrect answers in the latest evaluation
+- ✅ Hybrid Retrieval + Re-ranking improved answer quality across all tested documents
 
 ---
 
@@ -177,17 +224,23 @@ streamlit run app.py
 
 ---
 
-## 🎯 Future Improvements
+🎯 Future Improvements:
 
-- Persistent retrieved evidence
-- Streaming responses
-- Chat search
-- Rename chats
-- OCR support
-- DOCX support
-- Image understanding
-- User authentication
-- Cloud database
+☁️ Cloud deployment (AWS/Azure)
+
+📑 Citation-aware responses
+
+🔍 Metadata filtering
+
+🖼️ OCR support for scanned PDFs
+
+📄 DOCX support
+
+🔐 User authentication
+
+🗂️ Persistent vector database
+
+📊 Compliance document comparison
 
 ---
 
@@ -195,8 +248,6 @@ streamlit run app.py
 
 **Ganesh Reddy**
 
-LinkedIn: https://www.linkedin.com/in/karedla-ganesh-reddy/
-
-GitHub: https://github.com/ganeshreddy101
+- LinkedIn: https://www.linkedin.com/in/karedla-ganesh-reddy/
 
 ---
