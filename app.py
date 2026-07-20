@@ -390,9 +390,26 @@ if question:
                 st.session_state.chat_id
             )
             answer = response["answer"]
+            metrics = response.get("metrics", {})
+            stats = response.get("stats", {})
             
             st.markdown(answer)
-            
+            with st.expander("📊 Performance Metrics"):
+
+                st.markdown("### Document Statistics")
+
+                st.write(f"📄 PDFs Indexed: {stats.get('pdf_count', 0)}")
+                st.write(f"📃 Pages Indexed: {stats.get('page_count', 0)}")
+                st.write(f"✂️ Chunks Created: {stats.get('chunk_count', 0)}")
+
+                st.markdown("---")
+
+                st.markdown("### Response Performance")
+
+                st.write(f"⚡ Retrieval: {metrics.get('retrieval_ms', 0)} ms")
+                st.write(f"🔄 Reranking: {metrics.get('reranking_ms', 0)} ms")
+                st.write(f"🤖 LLM: {metrics.get('llm_ms', 0)} ms")
+                st.write(f"⏱️ Total: {metrics.get('total_ms', 0)} ms")
             sources = []
 
             for doc in response["sources"]:
@@ -410,7 +427,7 @@ if question:
                     }
                 )
 
-            if response["chunks"]:
+            if response.get("chunks"):
 
                 with st.expander("📚 Retrieved Evidence"):
 
@@ -438,7 +455,7 @@ if question:
             "role": "assistant",
             "content": answer,
             "sources": sources,
-            "chunks": response["chunks"]
+            "chunks": response.get("chunks", [])
         }
     )
 

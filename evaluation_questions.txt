@@ -1,0 +1,93 @@
+========================================
+NIST AI RMF 1.0 (30 Questions)
+========================================
+1. What is the primary purpose of the NIST AI Management Framework (AI RMF)?
+2. How does the AI RMF define an AI system?
+3. Why are AI systems considered different from traditional software systems?
+4. What are the main goals of AI risk management according to the framework?
+5. Is the AI RMF mandatory or voluntary? Explain.
+6. How does the AI RMF define risk?
+7. According to the AI RMF, what is risk management?
+8. What types of harms can AI systems cause?
+9. Why is measuring AI risk difficult?
+10. How can third-party software and datasets complicate AI risk measurement?
+11. What are emergent risks in AI systems?
+12. What factors influence an organization's AI risk tolerance?
+13. According to the AI RMF, when should AI development or deployment be stopped?
+14. What are the seven characteristics of trustworthy AI?
+15. Why is validity and reliability considered the foundation of trustworthy AI?
+16. What does "safe AI" mean according to the framework?
+17. How are security and resilience different in AI systems?
+18. Why are accountability and transparency important in AI systems?
+19. What is the difference between transparency, explainability, and interpretability?
+20. How can privacy-enhancing techniques affect AI performance?
+21. What are the three major categories of AI bias identified by NIST?
+22. Who are the intended audiences of the AI RMF?
+23. What role do AI actors play throughout the AI lifecycle?
+24. What are the four core functions of the AI RMF?
+25. Why is the GOVERN function considered cross-cutting?
+26. What is the purpose of the MAP function in the AI RMF?
+27. What is the purpose of the MEASURE function in the AI RMF?
+28. What is the purpose of the MANAGE function in the AI RMF?
+29. An AI system is highly accurate but lacks explainability and transparency. According to the AI RMF, why could this still be considered untrustworthy?
+30. A healthcare AI system starts producing unexpected results after deployment because the real-world data differs from its training data. Which trustworthiness characteristics and AI risk management concepts from the AI RMF are most relevant to addressing this issue?
+
+
+========================================
+OECD AI Principles (25 Questions)
+========================================
+31. What is the primary purpose of the OECD AI Principles?
+32. Why did the OECD establish the Expert Group on Artificial Intelligence (AIGO)?
+33. What characteristics were the OECD AI Principles intended to have?
+34. How does the OECD define an AI system?
+35. What are the three main elements of an AI system according to the OECD conceptual model?
+36. What roles do sensors, operational logic, and actuators play in an AI system?
+37. What is meant by the "environment" in the OECD AI system model?
+38. What is a model in an AI system?
+39. What is the difference between model building and model interpretation?
+40. Why are objectives and performance measures important during model building?
+41. What are the four phases of the AI system lifecycle?
+42. What activities are included in the design, data, and modelling phase?
+43. What is the purpose of the verification and validation phase?
+44. What responsibilities are involved during the deployment phase?
+45. Why is operation and monitoring considered a continuous process?
+46. Who are considered stakeholders in the AI system lifecycle?
+47. Who are AI actors, and how are they different from stakeholders?
+48. What are the six steps in the OECD AI risk management approach?
+49. Why should AI risk management be performed throughout the AI lifecycle instead of only during development?
+50. What are the five principles for responsible stewardship of trustworthy AI?
+51. How does the OECD recommend promoting human-centred values and fairness in AI systems?
+52. Why are transparency and explainability important according to the OECD AI Principles?
+53. What does robustness and safety require from AI actors throughout the AI lifecycle?
+54. What does accountability mean under the OECD AI Principles?
+55. Why does the OECD emphasize a lifecycle-based approach rather than evaluating AI systems only after deployment?
+
+
+========================================
+Trump Administration and Executive Order (25 Questions)
+========================================
+56. Why did President Trump revoke Executive Order 14110 issued by the Biden Administration?
+57. What is the primary objective of the Trump AI Executive Order?
+58. What does the Executive Order mean by promoting U.S. "global AI dominance"?
+59. Which presidential advisors are responsible for developing the AI Action Plan?
+60. Within what timeframe must the AI Action Plan be submitted?
+61. What review of previous AI policies does the Executive Order require?
+62. What actions should agencies take if existing AI policies conflict with the Trump AI Policy?
+63. What role does the Office of Management and Budget (OMB) play under the Executive Order?
+64. Which existing OMB memoranda are required to be revised?
+65. What AI governance practices were established under the Biden Administration that may be revised under the Trump Administration?
+66. What are the stated purposes of the Trump AI Executive Order?
+67. How does the Trump Executive Order describe AI systems that should be promoted?
+68. Which priorities emphasized in the Biden AI Executive Order are not emphasized in the Trump AI Executive Order?
+69. What implications could the Executive Order have for existing federal AI guidance?
+70. Why does the Executive Order require agencies to review actions taken under the Biden AI Executive Order?
+71. What is the significance of the 180-day AI Action Plan?
+72. How does the Executive Order balance AI innovation with national security?
+73. According to the document, why is it still uncertain what concrete actions will result from the Executive Order?
+74. What role does NIST play in the context of the Biden AI Executive Order discussed in the document?
+75. Why might NIST guidance and initiatives be subject to review under the Trump AI Executive Order?
+76. What does the document identify as the overall policy direction of the Trump Administration regarding AI?
+77. How does the Trump Executive Order differ from the Biden AI Executive Order in terms of governance priorities?
+78. What are the potential implications of revising or rescinding previous AI policies?
+79. Why does the document state that agencies should act consistently with applicable law when implementing the Executive Order?
+80. Based on the document, how could the Executive Order influence future U.S. AI policy and regulation?
