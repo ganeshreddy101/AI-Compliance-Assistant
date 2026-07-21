@@ -1,5 +1,7 @@
 # 🤖 AI Compliance Assistant
 
+**Compliance teams** waste hours manually searching through dense regulatory documents like NIST AI RMF, OECD AI Principles, and government executive orders. This tool lets them ask questions in plain English and get accurate, cited answers in seconds — across multiple documents simultaneously.
+
 A **Multi-PDF Retrieval-Augmented Generation (RAG) application** that enables users to chat with multiple compliance documents using **Hybrid Search (FAISS + BM25)**, **CrossEncoder Reranking**, and **Groq LLM**.
 
 The application supports **multiple independent chat sessions**, allowing users to upload different PDF collections into separate conversations while maintaining isolated vector databases and chat histories.
