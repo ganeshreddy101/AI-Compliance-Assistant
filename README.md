@@ -228,22 +228,32 @@ streamlit run app.py
 
 🎯 Future Improvements:
 
-☁️ Cloud deployment (AWS/Azure)
+🗺️ Roadmap
 
-📑 Citation-aware responses
+☁️ Cloud Deployment (AWS/Azure)
+   Currently hosted on Streamlit Community Cloud. Production deployment
+   would use containerized FastAPI backend + managed vector store for
+   multi-user scalability.
 
-🔍 Metadata filtering
+🗂️ Persistent Vector Database
+   Vector stores currently rebuild per session. Switching to Pinecone or
+   Weaviate would enable persistence, faster startup, and shared indexes.
 
-🖼️ OCR support for scanned PDFs
+📑 Citation-Aware Responses
+   Responses currently show retrieved chunks separately. Next step is
+   inline citations within the answer itself (e.g., [NIST AI RMF, p.12]).
 
-📄 DOCX support
+🖼️ OCR for Scanned PDFs
+   PyMuPDF handles text-native PDFs well. Adding Tesseract/AWS Textract
+   would support scanned compliance documents common in legal workflows.
 
-🔐 User authentication
+🔐 User Authentication
+   Multi-session support exists but is not user-gated. Adding OAuth2
+   (Google/Microsoft SSO) would make this enterprise-ready.
 
-🗂️ Persistent vector database
-
-📊 Compliance document comparison
-
+📊 Compliance Document Comparison
+   Enable side-by-side querying across frameworks (e.g., "How does NIST
+   handle bias vs. OECD?") with structured diff output.
 ---
 
 ## 👨‍💻 Author
