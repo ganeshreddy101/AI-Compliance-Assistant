@@ -258,6 +258,13 @@ streamlit run app.py
 📊 Compliance Document Comparison
    Enable side-by-side querying across frameworks (e.g., "How does NIST
    handle bias vs. OECD?") with structured diff output.
+
+📊 RAGAS Evaluation Integration
+   Upgrade evaluation pipeline with automated RAGAS metrics — context
+   precision, answer relevancy, and faithfulness scoring — replacing
+   the current LLM-as-Judge approach with quantitative benchmarks.
+
+
 ---
 
 ## 👨‍💻 Author
