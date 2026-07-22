@@ -168,22 +168,26 @@ AI-Compliance-Assistant/
 | Improvement | — | **~164× Faster** |
 
 ---
-
 ## 📈 Evaluation
 
-The system was evaluated on **80 benchmark questions** across multiple AI compliance documents.
+### Methodology
+The system was evaluated using an **LLM-as-Judge** approach on a benchmark set of
+80 manually curated questions spanning multiple AI compliance documents. Each
+generated response was assessed for factual correctness against the source document
+— verifying that answers were grounded in retrieved context and free from
+hallucinations.
 
-### Documents
-
-- NIST AI Risk Management Framework
+### Evaluation Dataset
+Questions were drawn from the following compliance frameworks:
+- NIST AI Risk Management Framework (NIST AI RMF 1.0)
 - OECD AI Principles
-- Executive Order on Removing Barriers to American Leadership in Artificial Intelligence
+- Executive Order on AI Leadership (Trump Administration, 2025)
 
 ### Results
-
 - ✅ 80 benchmark questions evaluated
-- ✅ 0 incorrect answers in the latest evaluation
-- ✅ Hybrid Retrieval + Re-ranking improved answer quality across all tested documents
+- ✅ 0 factually incorrect answers detected
+- ✅ Hybrid Retrieval (FAISS + BM25) + Cross-Encoder Re-ranking consistently
+  improved context relevance across all evaluated documents
 
 ---
 
