@@ -1,0 +1,69 @@
+section[data-testid="stSidebar"]{
+    background:#0f1117;
+}
+
+.sidebar-card{
+    background:#171b22;
+    border:1px solid #2b313b;
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:10px;
+}
+
+.sidebar-card:hover{
+    border-color:#3b82f6;
+}
+
+.chat-title{
+    color:white;
+    font-size:15px;
+    font-weight:600;
+}
+
+.chat-time{
+    color:#8b949e;
+    font-size:12px;
+}
+
+.doc-name{
+    color:white;
+    font-size:14px;
+    font-weight:500;
+}
+
+.doc-pages{
+    color:#8b949e;
+    font-size:12px;
+}
+
+.block-container{
+    padding-top:1rem;
+}
+
+#MainMenu{
+    visibility:hidden;
+}
+
+footer{
+    visibility:hidden;
+}
+
+/* Always show the sidebar toggle button */
+[data-testid="stSidebarCollapseButton"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+}
+
+/* Prevent it from fading on hover */
+[data-testid="stSidebarCollapseButton"] button {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Chat spacing */
+
+[data-testid="stChatMessage"]{
+    padding-top:12px;
+    padding-bottom:12px;
+}
