@@ -2,6 +2,7 @@ import time
 import os
 import re
 from glob import glob
+import shutil
 
 from dotenv import load_dotenv
 from groq import Groq
@@ -396,6 +397,8 @@ def generate_answer(question, chat_history, chat_id):
 
 def rebuild_vectorstore(chat_id):
 
+    global retriever_cache
+    
     docs = load_documents(chat_id)
 
     pdf_count = len(glob(os.path.join(
@@ -408,6 +411,22 @@ def rebuild_vectorstore(chat_id):
     page_count = len(docs)
 
     if not docs:
+
+        vectorstore_path = os.path.join(
+            "storage",
+            chat_id,
+            "vectorstore"
+        )
+
+        if os.path.exists(vectorstore_path):
+
+            shutil.rmtree(vectorstore_path)
+
+        if chat_id in retriever_cache:
+            del retriever_cache[chat_id]
+
+        if chat_id in stats_cache:
+            del stats_cache[chat_id]
 
         return False
 
@@ -429,7 +448,6 @@ def rebuild_vectorstore(chat_id):
         "vectorstore"
     )
 
-    import shutil
 
     if os.path.exists(vectorstore_path):
 
@@ -440,17 +458,12 @@ def rebuild_vectorstore(chat_id):
         embeddings
     )
 
-    
-    
     vectorstore.save_local(
         vectorstore_path
     )
-    
-    global retriever_cache
 
     if chat_id in retriever_cache:
         del retriever_cache[chat_id]
-
 
     stats_cache[chat_id] = {
        "pdf_count": pdf_count,

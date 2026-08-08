@@ -1,8 +1,11 @@
 from glob import glob
 import os
+from time import time
 import streamlit as st
 import shutil
 import streamlit.components.v1 as components
+
+from components.render_message_card import render_message_card
 
 from rag_pipeline import (
     generate_answer,
@@ -29,6 +32,10 @@ if "open_doc_menu" not in st.session_state:
 
 if "open_chat_menu" not in st.session_state:
     st.session_state.open_chat_menu = None
+
+if "editing_chat" not in st.session_state:
+    st.session_state.editing_chat = None
+
 import re
 
 
@@ -41,31 +48,6 @@ def load_css():
 
 load_css()
 
-
-def create_chat_title(question):
-
-    question = question.lower()
-
-    stop_words = {
-        "what", "is", "are", "the", "a", "an",
-        "explain", "tell", "me", "about",
-        "how", "does", "do", "can",
-        "please", "of", "to", "for"
-    }
-
-    words = re.findall(r"\b\w+\b", question)
-
-    keywords = [
-        word
-        for word in words
-        if word not in stop_words
-    ]
-
-    title = " ".join(
-        keywords[:4]
-    )
-
-    return title.title() if title else "New Chat"
 
 
 def load_chat(chat_id):
@@ -125,31 +107,46 @@ def render_sidebar():
 
     with st.sidebar:
 
-        # ---------- Chats ----------
-        st.subheader("Chat History")
+        # ---------- New Chat ----------
 
-        if st.button("➕ New Chat"):
+        if st.button(
+            "➕ New Chat",
+            key="new_chat",
+            use_container_width=True
+        ):
             handle_new_chat()
 
+        # ---------- Search ----------
+
         search_query = st.text_input(
-           "",
-           placeholder="🔍 Search chats..."
-        )    
+            "",
+            placeholder="🔍 Search chats..."
+        )
+
+        # ---------- Chat History ----------
+
+        st.markdown("### Chat History")
 
         chat_titles = get_chat_titles()
 
         if search_query:
-           chat_titles = [
+
+            chat_titles = [
                 (chat_id, title)
                 for chat_id, title in chat_titles
                 if search_query.lower() in title.lower()
             ]
 
-        for chat_id, title in chat_titles:
 
-             with st.container(border=True):
+        with st.container(height=280):
 
-                col1, col2 = st.columns([8, 1])
+            for chat_id, title in chat_titles:
+
+
+                col1, col2 = st.columns(
+                    [9.2, 0.8],
+                    vertical_alignment="center"
+                )
 
                 with col1:
 
@@ -159,45 +156,63 @@ def render_sidebar():
                         use_container_width=True,
                         type="secondary"
                     ):
-                        handle_chat_switch(chat_id)
+                          handle_chat_switch(chat_id)
 
                 with col2:
 
-                   if st.button(
-                      "⋮",
-                      key=f"menu_{chat_id}"
-                   ):
+                    if st.button(
+                          "⋮",
+                          type="tertiary",
+                         key=f"menu_{chat_id}"
+                     ):
 
-                       if st.session_state.open_chat_menu == chat_id:
-                           st.session_state.open_chat_menu = None
-                       else:
-                          st.session_state.open_chat_menu = chat_id
+                          if st.session_state.open_chat_menu == chat_id:
+                             st.session_state.open_chat_menu = None
+                          else:
+                               st.session_state.open_chat_menu = chat_id
 
                 if st.session_state.open_chat_menu == chat_id:
 
-                     if st.button(
-                        "🗑️ Delete Chat",
-                        key=f"delete_{chat_id}",
+                 rename_col, delete_col = st.columns(
+                       2,
+                       gap="small"
+                 )
+
+                 with rename_col:
+
+                    if st.button(
+                        "Rename",
+                        key=f"rename_{chat_id}",
                         use_container_width=True
                     ):
+                        st.session_state.editing_chat = chat_id
+                        st.rerun()
+
+                 with delete_col:
+
+                      if st.button(
+                         "Delete",
+                         key=f"delete_{chat_id}",
+                         use_container_width=True
+                     ):
 
                         delete_chat_and_data(chat_id)
 
                         shutil.rmtree(
-                           os.path.join(
-                               "storage",
-                               chat_id
-                           ),
-                           ignore_errors=True
+                               os.path.join(
+                                  "storage",
+                                  chat_id
+                              ),
+                             ignore_errors=True
                         )
 
                         remaining_chats = get_chat_titles()
 
                         if remaining_chats:
 
-                           handle_chat_switch(
-                               remaining_chats[0][0]
-                           )
+                              handle_chat_switch(
+                                 remaining_chats[0][0]
+                             )
 
                         else:
 
@@ -205,11 +220,148 @@ def render_sidebar():
 
                             handle_chat_switch("chat_001")
 
-        st.divider()
+                if st.session_state.editing_chat == chat_id:
+
+                    new_title = st.text_input(
+                        "",
+                        value=title,
+                        key=f"title_input_{chat_id}"
+                    )
+
+                    save_col, cancel_col = st.columns(2)
+
+                    with save_col:
+
+                        if st.button(
+                            "Save",
+                            key=f"save_{chat_id}",
+                            use_container_width=True
+                        ):
+
+                            update_chat_title(
+                                chat_id,
+                                new_title.strip()
+                            )
+
+                            st.session_state.editing_chat = None
+
+                            st.rerun()
+
+                    with cancel_col:
+
+                        if st.button(
+                            "Cancel",
+                            key=f"cancel_{chat_id}",
+                            use_container_width=True
+                        ):
+
+                            st.session_state.editing_chat = None
 
 
-        return None
-    
+                            st.rerun()
+           
+
+            st.markdown(
+                "<div style='height:0px'></div>",
+                unsafe_allow_html=True
+            )
+
+        # ---------- Uploaded Documents ----------
+
+        st.subheader("📂 Uploaded Documents")
+
+        pdf_files = sorted(
+            glob(
+                os.path.join(
+                    "storage",
+                    st.session_state.chat_id,
+                    "documents",
+                    "*.pdf"
+                )
+            )
+        )
+
+        if pdf_files:
+
+            for pdf in pdf_files:
+
+                filename = os.path.basename(pdf)
+
+                row = st.container()
+
+                with row:
+
+                    left, right = st.columns(
+                        [8.7, 1.3],
+                        vertical_alignment="center"
+                    )
+
+                    with left:
+
+                        st.markdown(
+                            f"📄 {filename}"
+                        )
+
+                    with right:
+
+                        if st.button(
+                            "🗑️",
+                            key=f"delete_pdf_{filename}",
+                            use_container_width=True
+                        ):
+
+                            os.remove(pdf)
+
+                            rebuild_vectorstore(
+                                st.session_state.chat_id
+                            )
+
+                            st.rerun()
+
+        uploaded_files = st.file_uploader(
+            "",
+            type=["pdf"],
+            accept_multiple_files=True,
+            key=f"sidebar_uploader_{st.session_state.chat_id}",
+            label_visibility="collapsed",
+        )
+
+        if uploaded_files:
+
+            chat_folder = os.path.join(
+                "storage",
+                st.session_state.chat_id,
+                "documents"
+            )
+
+            os.makedirs(
+                chat_folder,
+                exist_ok=True
+            )
+
+            needs_rebuild = False
+
+            for uploaded_file in uploaded_files:
+
+                save_path = os.path.join(
+                    chat_folder,
+                    uploaded_file.name
+                )
+
+                if not os.path.exists(save_path):
+
+                    with open(save_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+
+                    needs_rebuild = True
+
+            if needs_rebuild:
+
+                rebuild_vectorstore(
+                    st.session_state.chat_id
+                )
+
+                st.rerun() 
 # ---------- Session State ----------
 
 if "chat_id" not in st.session_state:
@@ -225,6 +377,10 @@ if "chat_id" not in st.session_state:
     else:
 
         st.session_state.chat_id = chat_sessions[0]
+
+if "rebuild_pending" not in st.session_state:
+    st.session_state.rebuild_pending = False
+    
 
 st.set_page_config(
     page_title="AI Compliance Assistant",
@@ -256,8 +412,21 @@ with col2:
         ">
         AI-Powered Compliance Intelligence
         </p>
-
+        
         </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """
+        <style>
+
+        section[data-testid="stSidebar"] > div:first-child {
+            padding-top: 0rem !important;
+        }
+
+        </style>
         """,
         unsafe_allow_html=True
     )
@@ -266,11 +435,10 @@ st.divider()
 
 uploaded_files = render_sidebar()
 
-# ---------- Sidebar ----------
+# ---------- Main Chat Container ----------
 
-if "uploaded_file_names" not in st.session_state:
+chat_container = st.container()
 
-    st.session_state.uploaded_file_names = []
 
 
 
@@ -293,11 +461,14 @@ if "messages" not in st.session_state:
             }
         )
 
+if "rebuild_pending" not in st.session_state:
+        st.session_state.rebuild_pending = False
+
 #---------- Chat History ----------
 import html
 import uuid
 
-def render_copy_button(text):
+def copy_button(text):
 
     button_id = f"copy_{uuid.uuid4().hex}"
 
@@ -394,331 +565,26 @@ stroke-linejoin="round">
     )
 
 
-def render_message_card(message, index):
 
-    is_user = message["role"] == "user"
+with chat_container:
 
-    avatar = "👤" if is_user else "🤖"
-    title = "You" if is_user else "AI Assistant"
+    for message in st.session_state.messages:
 
-    with st.container(border=True):
+        render_message_card(message)
 
-        icon_col, content_col, copy_col = st.columns(
-            [1, 16, 1],
-            vertical_alignment="top"
-        )
 
-        # ---------------- Icon ----------------
-
-        with icon_col:
-
-            st.markdown(
-                f"""
-<div style="
-width:55px;
-height:55px;
-margin-top:-6px;
-display:flex;
-justify-content:center;
-align-items:center;
-background:#111318;
-border:1px solid #2d3340;
-border-radius:14px;
-font-size:24px;
-">
-{avatar}
-</div>
-""",
-                unsafe_allow_html=True
-            )
-
-        # ---------------- Title + Content ----------------
-
-        with content_col:
-
-            st.markdown(
-                f"""
-<div style="
-font-size:22px;
-font-weight:600;
-color:#d6d6d6;
-line-height:1;
-margin-top:8px;
-margin-bottom:8px;
-margin-left:-5px;
-">
-{title}
-</div>
-""",
-                unsafe_allow_html=True
-            )
-
-            st.markdown(
-                f"""
-<div style="
-font-size:16px;
-line-height:1.55;
-color:#ECECEC;
-margin-top:0;
-margin-left:-5px;
-">
-{message["content"]}
-</div>
-""",
-                unsafe_allow_html=True
-            )
-
-        # ---------------- Copy Button ----------------
-
-        with copy_col:
-
-            if not is_user:
-
-                render_copy_button(message["content"])
-
-        st.markdown(
-            "<div style='height:18px'></div>",
-            unsafe_allow_html=True
-        )
-
-        # ---------------- Retrieved Evidence ----------------
-
-        if not is_user:
-
-            spacer, content = st.columns([0.8, 16.2])
-
-            with content:
-
-              if "chunks" in message:
- 
-                  with st.expander("📚 Retrieved Evidence", expanded=False):
-
-                    for i, chunk in enumerate(message["chunks"], start=1):
-
-                        filename = os.path.basename(chunk["file"])
-                        page = chunk["page"]
-
-                        with st.container(border=True):
-
-                           left = st.container()
-
-                           with left:
-
-                              st.markdown(
-                                  f"""
-                    <div style="
-                    font-size:15px;
-                    font-weight:600;
-                    color:#ECECEC;
-                    margin-bottom:6px;
-                    ">
-                    {i}. 📄 {filename}
-                    </div>
-
-                    <div style="
-                    font-size:13px;
-                    color:#A8A8A8;
-                    ">
-                    Page {page}
-                    </div>
-                    """,
-                                unsafe_allow_html=True
-                            )
-
-                        st.markdown(
-                            f"""
-                    <div style="
-                    margin-top:10px;
-                    padding:12px;
-                    background:#111318;
-                    border:1px solid #2C313C;
-                    border-radius:10px;
-                    font-size:14px;
-                    line-height:1.6;
-                    color:#CFCFCF;
-                    ">
-                    {chunk["content"][:350]}...
-                    </div>
-                    """,
-                            unsafe_allow_html=True
-                        )
-
-                        st.markdown(
-                            "<div style='height:12px'></div>",
-                            unsafe_allow_html=True
-                        )
-
-        # ---------------- Performance Metrics ----------------
-
-        if not is_user:
-
-            spacer, content = st.columns([0.8, 16.2])
-
-            with content:
-
-               if "metrics" in message:
-
-                  metrics = message.get("metrics", {})
-                  stats = message.get("stats", {})
-
-                  with st.expander("📊 Performance Metrics", expanded=False):
-
-                        metrics_cards = [
-                            ("⚡", "Retrieval Time", metrics.get("retrieval_ms", 0)),
-                            ("🔄", "Reranking Time", metrics.get("reranking_ms", 0)),
-                            ("🧠", "LLM Response Time", metrics.get("llm_ms", 0)),
-                            ("⏱️", "Total Response Time", metrics.get("total_ms", 0)),
-                        ]
-
-                        cols = st.columns(
-                            4,
-                            gap="small"
-                        )
-
-                        for col, (icon, title, value) in zip(cols, metrics_cards):
-
-                            with col:
-
-                                with st.container(border=True):
-
-                                    left, right = st.columns(
-                                        [1, 5],
-                                        vertical_alignment="center"
-                                    )
-
-                                    with left:
-
-
-                                       st.markdown(
-                                          f"""
-                    <div style="
-                    font-size:22px;
-                    text-align:center;
-                    padding-top:6px;
-                    ">
-                    {icon}
-                    </div>
-                    """,
-
-                                           unsafe_allow_html=True
-                                        )
-
-                                    with right:
-
-                                        st.markdown(
-                                            f"""
-
-                    <div style="
-                    font-size:15px;
-                    font-weight:500;
-                    color:#C8C8C8;
-                    margin-top:2px;
-                    ">
-                    {title}
-                    </div>
-
-                    <div style="
-                    font-size:17px;
-                    font-weight:700;
-                    color:white;
-                    margin-top:4px;
-                    ">
-                    {value:.2f} ms
-                    </div>
-                    """,
-
-                
-                                unsafe_allow_html=True
-                            )
-                                            
-                            st.markdown(
-                                "<div style='height:10px'></div>",
-                                unsafe_allow_html=True
-        )
-
-for i, message in enumerate(st.session_state.messages):
-
-    render_message_card(message, i)
-
-
-# ---------- Attached Documents ----------
-
-st.markdown(
-    """
-<style>
-.attached-files-row{
-    display:flex;
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    overflow-y:hidden;
-    gap:10px;
-    padding:8px 0 10px 0;
-    scrollbar-width:thin;
-}
-
-.attached-file{
-    flex:0 0 auto;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:8px 12px;
-    border-radius:12px;
-    background:#111318;
-    border:1px solid #2d3340;
-    color:white;
-    font-size:14px;
-    white-space:nowrap;
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-chips = '<div class="attached-files-row">'
-
-pdf_files = glob(
-    os.path.join(
-        "storage",
-        st.session_state.chat_id,
-        "documents",
-        "*.pdf"
-    )
-)
-
-for pdf in pdf_files:
-
-    filename = os.path.basename(pdf)
-
-    chips += f"""
-<div class="attached-file">
-📄 {filename}
-</div>
-"""
-
-chips += "</div>"
-
-st.markdown(
-    chips,
-    unsafe_allow_html=True,
-)
-
-
-
-    # ---------------- Chat Input ----------------
+# ---------------- Chat Input ----------------
 
 chat_data = st.chat_input(
-    placeholder="Ask a compliance question...",
-    accept_file="multiple",
-    file_type=["pdf"]
+    placeholder="Ask a compliance question..."
 )
+
 
 if chat_data:
 
-    question = chat_data.text
-    uploaded_files = chat_data.files
+    question = chat_data
 
 
-    # ---------- Process Uploaded PDFs ----------
 
     if uploaded_files:
 
@@ -733,28 +599,26 @@ if chat_data:
         exist_ok=True
     )
 
-    needs_rebuild = False
+        needs_rebuild = False
 
-    for uploaded_file in uploaded_files:
+        for uploaded_file in uploaded_files:
 
-        save_path = os.path.join(
+            save_path = os.path.join(
             chat_folder,
             uploaded_file.name
-        )
+            )
 
-        if not os.path.exists(save_path):
 
             with open(save_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
             needs_rebuild = True
 
-    if needs_rebuild:
+        if needs_rebuild:
 
-        rebuild_vectorstore(
-            st.session_state.chat_id
-        )
-
+            rebuild_vectorstore(
+                st.session_state.chat_id
+            )
 
 
      # ---------------- User Message ----------------
@@ -798,6 +662,7 @@ if chat_data:
       st.session_state.chat_id
     )
 
+
     answer = response["answer"]
 
     metrics = response.get("metrics", {})
@@ -837,22 +702,3 @@ if chat_data:
      )
 
     st.rerun()
-
-    # ---------------- Generate Title ----------------
-
-    user_messages = [
-        msg
-        for msg in st.session_state.messages
-        if msg["role"] == "user"
-    ]
-
-    if len(user_messages) == 1:
-
-       title = create_chat_title(question)
-
-       update_chat_title(
-          st.session_state.chat_id,
-          title
-       )
-
-       st.rerun()
