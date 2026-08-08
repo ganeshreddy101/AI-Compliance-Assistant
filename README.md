@@ -34,40 +34,25 @@ The application supports **multiple independent chat sessions**, allowing users 
 
 ### 🏠 Main Dashboard
 
-The main interface demonstrating multi-chat support, PDF management, and AI-generated responses.
-
-<p align="center">
-  <img src="images/Main.png" width="900">
-</p>
+![Main Dashboard](images/main.png)
 
 ---
 
 ### 📑 Empty State
 
-Upload one or more PDF documents to start asking compliance questions and receive grounded, source-backed answers.
+![Empty State](images/empty-state.png)
 
-<p align="center">
-  <img src="images/Empty State.png" width="900">
-</p>
-
+---
 
 ### 📚 Retrieved Evidence
 
-Displays the supporting document chunks retrieved by the Hybrid RAG pipeline before answer generation.
-
-<p align="center">
-  <img src="images/Retrieved Evidence.png" width="900">
-</p>
+![Retrieved Evidence](images/retrieved-evidence.png)
 
 ---
 
 ### 📊 Performance Metrics
 
-Shows retrieval statistics and execution metrics to help evaluate system performance.
-
-<p align="center">
-  <img src="images/Performance Metrics.png" width="900">
-</p>
+![Performance Metrics](images/performance-metrics.png)
 
 ---
 
