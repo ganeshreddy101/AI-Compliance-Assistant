@@ -1,12 +1,23 @@
 import sqlite3
 import os
-import sqlite3
+
+DB_PATH = "chat_history.db"
+
+def get_connection():
+    conn = sqlite3.connect(
+        DB_PATH,
+        timeout=30,
+        check_same_thread=False
+    )
+
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA foreign_keys=ON;")
+
+    return conn
 
 def init_db():
 
-    conn = sqlite3.connect(
-        "chat_history.db"
-    )
+    conn = get_connection()
 
     cursor = conn.cursor()
 
@@ -36,21 +47,14 @@ def init_db():
     conn.close()
 
 
-def save_message(
-    chat_id,
-    role,
-    content
-):
+def save_message(chat_id, role, content):
 
-    conn = sqlite3.connect(
-        "chat_history.db"
-    )
-
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
         """
-        INSERT INTO messages (
+        INSERT INTO messages(
             chat_id,
             role,
             content
@@ -68,14 +72,9 @@ def save_message(
     conn.close()
 
 
-def load_messages(
-    chat_id
-):
+def load_messages(chat_id):
 
-    conn = sqlite3.connect(
-        "chat_history.db"
-    )
-
+    conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -86,7 +85,7 @@ def load_messages(
        AND role != 'system'
        ORDER BY id
        """,
-       (chat_id,) 
+       (chat_id,)
     )
 
     rows = cursor.fetchall()
@@ -98,9 +97,7 @@ def load_messages(
 
 def get_chat_sessions():
 
-    conn = sqlite3.connect(
-        "chat_history.db"
-    )
+    conn = get_connection()
 
     cursor = conn.cursor()
 
@@ -142,9 +139,7 @@ def create_chat(chat_id):
         exist_ok=True
     )
 
-    conn = sqlite3.connect(
-        "chat_history.db"
-    )
+    conn = get_connection()
 
     cursor = conn.cursor()
 
@@ -183,9 +178,7 @@ def create_chat(chat_id):
 
 def update_chat_title(chat_id, title):
 
-    conn = sqlite3.connect(
-        "chat_history.db"
-    )
+    conn = get_connection()
 
     cursor = conn.cursor()
 
@@ -207,9 +200,7 @@ def update_chat_title(chat_id, title):
 
 def get_chat_titles():
 
-    conn = sqlite3.connect(
-        "chat_history.db"
-    )
+    conn = get_connection()
 
     cursor = conn.cursor()
 
@@ -229,9 +220,7 @@ def get_chat_titles():
 
 def delete_chat(chat_id):
 
-    conn = sqlite3.connect(
-            "chat_history.db"
-    )
+    conn = get_connection()
 
     cursor = conn.cursor()
 
@@ -258,9 +247,7 @@ def delete_chat_and_data(chat_id):
 
        import sqlite3
 
-       conn = sqlite3.connect(
-          "chat_history.db"
-       )
+       conn = get_connection()
 
        cursor = conn.cursor()
 

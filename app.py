@@ -1,11 +1,16 @@
 from glob import glob
 import os
+from time import time
 import streamlit as st
 import shutil
+import streamlit.components.v1 as components
+
+from components.render_message_card import render_message_card
 
 from rag_pipeline import (
     generate_answer,
     rebuild_vectorstore,
+    generate_chat_title,
 )
 
 from database import (
@@ -19,35 +24,30 @@ from database import (
     delete_chat,
     delete_chat_and_data,
 )
+
 init_db()
+
+if "open_doc_menu" not in st.session_state:
+    st.session_state.open_doc_menu = None
+
+if "open_chat_menu" not in st.session_state:
+    st.session_state.open_chat_menu = None
+
+if "editing_chat" not in st.session_state:
+    st.session_state.editing_chat = None
 
 import re
 
 
-def create_chat_title(question):
+def load_css():
+    with open("styles/theme.css") as f:
+        st.markdown(
+            f"<style>{f.read()}</style>",
+            unsafe_allow_html=True
+        )
 
-    question = question.lower()
+load_css()
 
-    stop_words = {
-        "what", "is", "are", "the", "a", "an",
-        "explain", "tell", "me", "about",
-        "how", "does", "do", "can",
-        "please", "of", "to", "for"
-    }
-
-    words = re.findall(r"\b\w+\b", question)
-
-    keywords = [
-        word
-        for word in words
-        if word not in stop_words
-    ]
-
-    title = " ".join(
-        keywords[:4]
-    )
-
-    return title.title() if title else "New Chat"
 
 
 def load_chat(chat_id):
@@ -72,91 +72,217 @@ def load_chat(chat_id):
 
 def handle_new_chat():
 
-    chat_count = len(get_chat_titles()) + 1
+    existing_ids = {
+        chat_id
+        for chat_id, _ in get_chat_titles()
+    }
 
-    new_chat = f"chat_{chat_count:03d}"
+    counter = 1
+
+    while True:
+
+        new_chat = f"chat_{counter:03d}"
+
+        if new_chat not in existing_ids:
+            break
+
+        counter += 1
 
     create_chat(new_chat)
 
-    handle_chat_switch(new_chat)
+    load_chat(new_chat)
+
+    # ---------- Clear paperclip UI ----------
+    st.session_state.attached_files = []
+
+    st.rerun()
 
 
 def handle_chat_switch(chat_id):
 
     load_chat(chat_id)
 
-    st.rerun()
-
 
 def render_sidebar():
 
     with st.sidebar:
 
-        # ---------- Chats ----------
-        st.subheader("💬 Chats")
+        # ---------- New Chat ----------
 
-        if st.button("➕ New Chat"):
+        if st.button(
+            "➕ New Chat",
+            key="new_chat",
+            use_container_width=True
+        ):
             handle_new_chat()
+
+        # ---------- Search ----------
+
+        search_query = st.text_input(
+            "",
+            placeholder="🔍 Search chats..."
+        )
+
+        # ---------- Chat History ----------
+
+        st.markdown("### Chat History")
 
         chat_titles = get_chat_titles()
 
-        for chat_id, title in chat_titles:
+        if search_query:
 
-            col1, col2 = st.columns([5, 1])
+            chat_titles = [
+                (chat_id, title)
+                for chat_id, title in chat_titles
+                if search_query.lower() in title.lower()
+            ]
 
-            with col1:
 
-                if st.button(
-                      f"📄 {title}",
-                      key=f"chat_{chat_id}"
-                ):
+        with st.container(height=280):
 
-                      handle_chat_switch(chat_id)
+            for chat_id, title in chat_titles:
 
-            with col2:
 
-               if st.button(
-                   "🗑️",
-                   key=f"delete_{chat_id}"
-              ):
+                col1, col2 = st.columns(
+                    [9.2, 0.8],
+                    vertical_alignment="center"
+                )
 
-                   delete_chat_and_data(chat_id)
+                with col1:
 
-                   shutil.rmtree(
-                      os.path.join(
-                          "storage",
-                          chat_id
-                      ),
-                      ignore_errors=True
-                   )
+                    if st.button(
+                        f"💬 {title}",
+                        key=f"chat_{chat_id}",
+                        use_container_width=True,
+                        type="secondary"
+                    ):
+                          handle_chat_switch(chat_id)
 
-                   remaining_chats = get_chat_titles()
+                with col2:
 
-                   if remaining_chats:
+                    if st.button(
+                          "⋮",
+                          type="tertiary",
+                         key=f"menu_{chat_id}"
+                     ):
 
-                       handle_chat_switch(
-                           remaining_chats[0][0]
-                       )
+                          if st.session_state.open_chat_menu == chat_id:
+                             st.session_state.open_chat_menu = None
+                          else:
+                               st.session_state.open_chat_menu = chat_id
 
-                   else:
+                if st.session_state.open_chat_menu == chat_id:
 
-                        create_chat("chat_001")
+                 rename_col, delete_col = st.columns(
+                       2,
+                       gap="small"
+                 )
 
-                        handle_chat_switch("chat_001")
+                 with rename_col:
 
-                   st.rerun()
+                    if st.button(
+                        "Rename",
+                        key=f"rename_{chat_id}",
+                        use_container_width=True
+                    ):
+                        st.session_state.editing_chat = chat_id
+                        st.rerun()
 
-        st.divider()
+                 with delete_col:
+
+                      if st.button(
+                         "Delete",
+                         key=f"delete_{chat_id}",
+                         use_container_width=True
+                     ):
+
+                        delete_chat_and_data(chat_id)
+
+                        st.session_state.open_chat_menu = None
+                        st.session_state.editing_chat = None
+
+                        shutil.rmtree(
+                               os.path.join(
+                                  "storage",
+                                  chat_id
+                              ),
+                             ignore_errors=True
+                        )
+
+                        remaining_chats = get_chat_titles()
+
+                        if remaining_chats:
+
+                              handle_chat_switch(
+                                 remaining_chats[0][0]
+                             )
+
+                        else:
+
+                            create_chat("chat_001")
+
+                            handle_chat_switch("chat_001")
+
+                        st.rerun()
+
+                if st.session_state.editing_chat == chat_id:
+
+                    new_title = st.text_input(
+                        "",
+                        value=title,
+                        key=f"title_input_{chat_id}"
+                    )
+
+                    save_col, cancel_col = st.columns(2)
+
+                    with save_col:
+
+                        if st.button(
+                            "Save",
+                            key=f"save_{chat_id}",
+                            use_container_width=True
+                        ):
+
+                            update_chat_title(
+                                chat_id,
+                                new_title.strip()
+                            )
+
+                            st.session_state.editing_chat = None
+
+                            st.rerun()
+
+                    with cancel_col:
+
+                        if st.button(
+                            "Cancel",
+                            key=f"cancel_{chat_id}",
+                            use_container_width=True
+                        ):
+
+                            st.session_state.editing_chat = None
+
+
+                            st.rerun()
+           
+
+            st.markdown(
+                "<div style='height:0px'></div>",
+                unsafe_allow_html=True
+            )
 
         # ---------- Uploaded Documents ----------
+
         st.subheader("📂 Uploaded Documents")
 
-        pdf_files = glob(
-            os.path.join(
-                "storage",
-                st.session_state.chat_id,
-                "documents",
-                "*.pdf"
+        pdf_files = sorted(
+            glob(
+                os.path.join(
+                    "storage",
+                    st.session_state.chat_id,
+                    "documents",
+                    "*.pdf"
+                )
             )
         )
 
@@ -164,47 +290,83 @@ def render_sidebar():
 
             for pdf in pdf_files:
 
-                col1, col2 = st.columns([5, 1])
+                filename = os.path.basename(pdf)
 
-                with col1:
+                row = st.container()
 
-                    st.success(
-                        os.path.basename(pdf)
+                with row:
+
+                    left, right = st.columns(
+                        [8.7, 1.3],
+                        vertical_alignment="center"
                     )
 
-                with col2:
+                    with left:
 
-                    if st.button(
-                        "🗑️",
-                        key=f"delete_{os.path.basename(pdf)}"
-                    ):
-
-                        os.remove(pdf)
-
-                        rebuild_vectorstore(
-                            st.session_state.chat_id
+                        st.markdown(
+                            f"📄 {filename}"
                         )
 
-                        st.rerun()
+                    with right:
 
-        else:
+                        if st.button(
+                            "🗑️",
+                            key=f"delete_pdf_{filename}",
+                            use_container_width=True
+                        ):
 
-            st.info("No documents uploaded.")
+                            os.remove(pdf)
 
-        st.divider()
+                            rebuild_vectorstore(
+                                st.session_state.chat_id
+                            )
 
-        # ---------- Upload ----------
-        st.header("📤 Document Upload")
+                            st.rerun()
 
         uploaded_files = st.file_uploader(
-            "Upload PDF Files",
+            "",
             type=["pdf"],
             accept_multiple_files=True,
-            key=f"uploader_{st.session_state.chat_id}"
+            key=f"sidebar_uploader_{st.session_state.chat_id}",
+            label_visibility="collapsed",
         )
 
-    return uploaded_files
+        if uploaded_files:
 
+            chat_folder = os.path.join(
+                "storage",
+                st.session_state.chat_id,
+                "documents"
+            )
+
+            os.makedirs(
+                chat_folder,
+                exist_ok=True
+            )
+
+            needs_rebuild = False
+
+            for uploaded_file in uploaded_files:
+
+                save_path = os.path.join(
+                    chat_folder,
+                    uploaded_file.name
+                )
+
+                if not os.path.exists(save_path):
+
+                    with open(save_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+
+                    needs_rebuild = True
+
+            if needs_rebuild:
+
+                rebuild_vectorstore(
+                    st.session_state.chat_id
+                )
+
+                st.rerun() 
 # ---------- Session State ----------
 
 if "chat_id" not in st.session_state:
@@ -212,12 +374,18 @@ if "chat_id" not in st.session_state:
     chat_sessions = get_chat_sessions()
     
     if not chat_sessions:
+
         create_chat("chat_001")
-        st.session_state.chat_id = "chat_001"
+
+        load_chat("chat_001")
 
     else:
 
         st.session_state.chat_id = chat_sessions[0]
+
+if "rebuild_pending" not in st.session_state:
+    st.session_state.rebuild_pending = False
+    
 
 st.set_page_config(
     page_title="AI Compliance Assistant",
@@ -227,70 +395,35 @@ st.set_page_config(
 
 # ---------- Header ----------
 
-st.title("🤖 AI Compliance Assistant")
+col1, col2, col3 = st.columns([1, 8, 1])
 
-st.caption(
-    "Multi-PDF GenAI RAG System powered by Hybrid Search, Reranking and Qwen"
-)
+with col2:
+
+    st.title("🤖 AI Compliance Assistant")
+
+    st.markdown(
+        """
+        <style>
+
+        section[data-testid="stSidebar"] > div:first-child{
+            padding-top:0rem !important;
+        }
+
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 st.divider()
 
 uploaded_files = render_sidebar()
 
-# ---------- Sidebar ----------
+# ---------- Main Chat Container ----------
 
-if "uploaded_file_names" not in st.session_state:
+chat_container = st.container()
 
-    st.session_state.uploaded_file_names = []
 
-if uploaded_files:
 
-    chat_folder = os.path.join(
-        "storage",
-        st.session_state.chat_id,
-        "documents"
-    )
-
-    current_files = sorted(
-        [file.name for file in uploaded_files]
-    )
-
-    # Only process when uploaded files change
-    if current_files != st.session_state.uploaded_file_names:
-
-        st.session_state.uploaded_file_names = current_files
-
-        os.makedirs(
-            chat_folder,
-            exist_ok=True
-        )
-
-        for uploaded_file in uploaded_files:
-
-            save_path = os.path.join(
-                chat_folder,
-                uploaded_file.name
-            )
-
-            if os.path.exists(save_path):
-
-                continue
-
-            with open(save_path, "wb") as f:
-
-                f.write(
-                    uploaded_file.getbuffer()
-                )
-
-        rebuild_vectorstore(
-            st.session_state.chat_id
-        )
-
-        st.success(
-            "Documents uploaded successfully."
-        )
-        
-        st.rerun()
 
 # ---------- Session State ----------
 
@@ -311,44 +444,190 @@ if "messages" not in st.session_state:
             }
         )
 
+if "rebuild_pending" not in st.session_state:
+        st.session_state.rebuild_pending = False
+
 #---------- Chat History ----------
-for message in st.session_state.messages:
+import html
+import uuid
 
-    with st.chat_message(message["role"]):
+def copy_button(text):
 
-        st.markdown(message["content"])
+    button_id = f"copy_{uuid.uuid4().hex}"
 
-        if message["role"] == "assistant":
+    safe_text = html.escape(text)
 
-            if "chunks" in message:
+    components.html(
+        f"""
+<div style="display:flex;justify-content:flex-end;">
 
-                with st.expander("📚 Retrieved Evidence"):
+<button
+id="{button_id}"
+style="
+background:transparent;
+border:none;
+cursor:pointer;
+padding:8px;
+display:flex;
+align-items:center;
+justify-content:center;
+">
 
-                    for chunk in message["chunks"]:
+<svg id="{button_id}_icon"
+xmlns="http://www.w3.org/2000/svg"
+width="19"
+height="19"
+viewBox="0 0 24 24"
+fill="none"
+stroke="#b3b3b3"
+stroke-width="2"
+stroke-linecap="round"
+stroke-linejoin="round">
 
-                       st.markdown(
-                           f"""
-            **📄 File:** {os.path.basename(chunk['file'])}
+<rect x="9" y="9" width="13" height="13" rx="2"></rect>
+<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
 
-            **📄 Page:** {chunk['page']}
-            """
-                        )
+</svg>
 
-                       st.code(
-                              chunk["content"],
-                              language="text"
-                       )
+</button>
 
-                       st.divider()
+</div>
 
-# ---------- Chat Input ----------
-question = st.chat_input(
-    "Ask a compliance question..."
+<script>
+
+const btn=document.getElementById("{button_id}");
+
+btn.onclick=async()=>{{
+
+await navigator.clipboard.writeText(`{safe_text}`);
+
+const icon = document.getElementById("{button_id}_icon");
+
+icon.outerHTML = `
+<svg
+id="{button_id}_icon"
+xmlns="http://www.w3.org/2000/svg"
+width="19"
+height="19"
+viewBox="0 0 24 24"
+fill="none"
+stroke="#4ade80"
+stroke-width="2"
+stroke-linecap="round"
+stroke-linejoin="round">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>`;
+
+setTimeout(() => {{
+
+document.getElementById("{button_id}_icon").outerHTML = `
+<svg
+id="{button_id}_icon"
+xmlns="http://www.w3.org/2000/svg"
+width="19"
+height="19"
+viewBox="0 0 24 24"
+fill="none"
+stroke="#b3b3b3"
+stroke-width="2"
+stroke-linecap="round"
+stroke-linejoin="round">
+
+<rect x="9" y="9" width="13" height="13" rx="2"></rect>
+<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+
+</svg>`;
+
+}}, 1800);
+
+}}
+
+</script>
+""",
+        height=42,
+    )
+
+
+with chat_container:
+
+    if not st.session_state.messages:
+                
+                        st.markdown("<br>", unsafe_allow_html=True)
+
+                        left, content, right = st.columns([1.2, 2.8, 2.0])
+
+                        with content:
+                            st.subheader("📄 No documents uploaded")
+
+                            st.caption(
+                                "Upload one or more PDF documents to start exploring compliance insights."
+                            )
+
+                            st.markdown("")
+
+                            st.markdown("#### 💡 Try asking")
+
+                            st.markdown("""
+                - Summarize this document
+                - What are the key compliance requirements?
+                - Which sections mention AI risk management?
+                """)
+
+    else:
+
+        for message in st.session_state.messages:
+
+            render_message_card(message)
+
+# ---------------- Chat Input ----------------
+
+chat_data = st.chat_input(
+    placeholder="Ask a compliance question..."
 )
 
-if question:
 
-    # ---------------- User Message ----------------
+if chat_data:
+
+    question = chat_data
+
+
+
+    if uploaded_files:
+
+        chat_folder = os.path.join(
+            "storage",
+            st.session_state.chat_id,
+            "documents"
+        )
+
+        os.makedirs(
+        chat_folder,
+        exist_ok=True
+    )
+
+        needs_rebuild = False
+
+        for uploaded_file in uploaded_files:
+
+            save_path = os.path.join(
+            chat_folder,
+            uploaded_file.name
+            )
+
+
+            with open(save_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+
+            needs_rebuild = True
+
+        if needs_rebuild:
+
+            rebuild_vectorstore(
+                st.session_state.chat_id
+            )
+
+
+     # ---------------- User Message ----------------
  
     st.session_state.messages.append(
         {
@@ -363,125 +642,71 @@ if question:
         question
     )
 
-    with st.chat_message("user"):
+    chat_titles = dict(get_chat_titles())
 
-        st.markdown(question)
+    if chat_titles.get(st.session_state.chat_id) == "New Chat":
 
-    # ---------------- Assistant ----------------
+        title = generate_chat_title(question)
+
+        update_chat_title(
+            st.session_state.chat_id,
+            title
+        )
+
    
-    with st.chat_message("assistant"):
-        
-        with st.spinner(
-            "Searching compliance documents..."
-        ):
-            
-            chat_history = ""
+    chat_history = ""
 
-            for msg in st.session_state.messages[-6:]:
+    for msg in st.session_state.messages[-6:]:
 
-                chat_history += (
-                    f"{msg['role']}: "
-                    f"{msg['content']}\n"
-                )
-            
-            response = generate_answer(
-                question,
-                chat_history,
-                st.session_state.chat_id
-            )
-            answer = response["answer"]
-            metrics = response.get("metrics", {})
-            stats = response.get("stats", {})
-            
-            st.markdown(answer)
-            with st.expander("📊 Performance Metrics"):
+      chat_history += (
+        f"{msg['role']}: {msg['content']}\n"
+    )
 
-                st.markdown("### Document Statistics")
+    with st.spinner("🔍 Searching documents..."):
 
-                st.write(f"📄 PDFs Indexed: {stats.get('pdf_count', 0)}")
-                st.write(f"📃 Pages Indexed: {stats.get('page_count', 0)}")
-                st.write(f"✂️ Chunks Created: {stats.get('chunk_count', 0)}")
+        response = generate_answer(
+            question,
+            chat_history,
+            st.session_state.chat_id
+        )
 
-                st.markdown("---")
 
-                st.markdown("### Response Performance")
+    answer = response["answer"]
 
-                st.write(f"⚡ Retrieval: {metrics.get('retrieval_ms', 0)} ms")
-                st.write(f"🔄 Reranking: {metrics.get('reranking_ms', 0)} ms")
-                st.write(f"🤖 LLM: {metrics.get('llm_ms', 0)} ms")
-                st.write(f"⏱️ Total: {metrics.get('total_ms', 0)} ms")
-            sources = []
+    metrics = response.get("metrics", {})
 
-            for doc in response["sources"]:
+    stats = response.get("stats", {})
 
-                sources.append(
-                    {
-                        "file": doc.metadata.get(
-                            "source",
-                            "Unknown"
-                        ),
-                        "page": doc.metadata.get(
-                            "page",
-                            "Unknown"
-                        )
-                    }
-                )
+    sources = []
 
-            if response.get("chunks"):
+    for doc in response["sources"]:
 
-                with st.expander("📚 Retrieved Evidence"):
-
-                    for chunk in response["chunks"]:
-
-                        st.markdown(
-                             f"""
-            **📄 File:** {os.path.basename(chunk['file'])}
-
-            **📄 Page:** {chunk['page']}
-            """
-                         )
-
-                        st.code(
-                              chunk["content"],
-                              language="text"
-                        )
-
-                        st.divider()
+       sources.append(
+         {
+             "file": doc.metadata.get("source", "Unknown"),
+             "page": doc.metadata.get("page", "Unknown")
+         }
+    )
+    
 
     # ---------------- Save Assistant ----------------
 
     st.session_state.messages.append(
-        {
-            "role": "assistant",
-            "content": answer,
-            "sources": sources,
-            "chunks": response.get("chunks", [])
-        }
+     {
+        "role": "assistant",
+        "content": answer,
+        "sources": sources,
+        "chunks": response.get("chunks", []),
+        "metrics": metrics,
+        "stats": stats,
+      }
     )
+
 
     save_message(
         st.session_state.chat_id,
         "assistant",
         answer
-    )
+     )
 
-    
-
-    # ---------------- Generate Title ----------------
-
-    user_messages = [
-        msg
-        for msg in st.session_state.messages
-        if msg["role"] == "user"
-    ]
-
-    if len(user_messages) == 1:
-
-       title = create_chat_title(question)
-
-       update_chat_title(
-          st.session_state.chat_id,
-          title
-       )
-
-       st.rerun()
+    st.rerun()

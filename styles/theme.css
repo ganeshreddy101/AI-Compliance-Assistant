@@ -1,0 +1,233 @@
+.block-container{
+    padding-top:1rem;
+}
+
+#MainMenu{
+    visibility:hidden;
+}
+
+footer{
+    visibility:hidden;
+}
+
+/* Always show the sidebar toggle button */
+[data-testid="stSidebarCollapseButton"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+}
+
+/* Prevent it from fading on hover */
+[data-testid="stSidebarCollapseButton"] button {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Chat spacing */
+
+[data-testid="stChatMessage"]{
+    padding-top:12px;
+    padding-bottom:12px;
+}
+
+/* ==========================================================
+   Responsive Chat Layout
+========================================================== */
+
+/* Main content */
+.block-container{
+    max-width:1200px;
+    width:100%;
+    margin:0 auto;
+    padding:1rem 2rem 0 2rem;
+    box-sizing:border-box;
+}
+
+/* Keep the main layout stable */
+section.main > div{
+    padding-top:0 !important;
+}
+
+/* Chat messages */
+[data-testid="stChatMessage"]{
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+}
+
+/* Prevent overflow */
+.stMarkdown,
+.stExpander,
+.stContainer{
+    max-width:100%;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    box-sizing:border-box;
+}
+
+/* Images / tables */
+img,
+table{
+    max-width:100%;
+    height:auto;
+}
+
+body,
+.stApp{
+    background:#0A0A0A;
+}
+
+
+section[data-testid="stSidebar"]{
+    background:#0A0A0A !important;
+    border-right:1px solid #4A4A4A;
+}
+
+
+section.stMain{
+    border-left:1px solid rgba(255,255,255,.18);
+}
+
+
+/* ===============================
+   Chat Input
+=============================== */
+
+/* Chat input container */
+
+[data-testid="stChatInput"] > div{
+    background:#262730 !important;
+    border:1px solid #4A4A4A !important;
+    border-radius:20px !important;
+}
+
+/* Textarea */
+
+[data-baseweb="textarea"]{
+    background:transparent !important;
+}
+
+/* Remove left black crescent */
+
+[data-baseweb="textarea"] > div{
+    background: transparent !important;
+    border-radius: 20px !important;
+}
+
+[data-baseweb="textarea"]{
+    background: transparent !important;
+}
+
+
+/* Remove Streamlit left gray area */
+
+[data-testid="stChatInput"] > div{
+    background: transparent !important;
+}
+
+[data-testid="stChatInput"] > div > div{
+    background: transparent !important;
+}
+
+div[data-baseweb="base-input"] textarea{
+    background:transparent !important;
+    color:#ECECEC !important;
+}
+
+div[data-baseweb="base-input"]::before,
+div[data-baseweb="base-input"]::after{
+    background:transparent !important;
+}
+
+/* Bottom input area */
+[data-testid="stBottomBlockContainer"]{
+    background:#0A0A0A !important;
+}
+
+/* Hide Streamlit's temporary selected file list */
+
+[data-testid="stFileUploaderFile"] {
+    display: none !important;
+}
+
+
+/* Compact Rename / Delete menu */
+
+button[kind="secondary"] p{
+    font-size:12px;
+}
+
+
+/* ---------- Scrollable Chat History ---------- */
+
+.chat-history-scroll{
+
+    max-height:420px;
+
+    overflow-y:auto;
+
+    overflow-x:hidden;
+
+    padding-right:6px;
+}
+
+
+
+/* Chat buttons */
+
+.stButton > button{
+
+    transition:.2s;
+
+}
+
+.stButton > button:hover{
+
+    transform:translateY(-1px);
+
+    border:1px solid #5F5FFF !important;
+
+    background:#353545 !important;
+
+}
+
+.stButton > button:focus,
+.stButton > button:focus-visible{
+
+    outline:none !important;
+
+    border:1px solid #5F5FFF !important;
+
+}
+
+/* Keep chat button text white */
+
+.stButton > button:hover p,
+.stButton > button:focus p,
+.stButton > button:focus-visible p,
+.stButton > button:active p {
+
+    color: #ECECEC !important;
+
+}
+
+/* Active chat */
+
+.stButton > button[kind="primary"]{
+
+    background:#3A3A4F !important;
+
+    border:1px solid #7C7CFF !important;
+
+    color:#ECECEC !important;
+
+}
+
+.stButton > button[kind="primary"] p{
+
+    color:#ECECEC !important;
+
+    font-weight:600 !important;
+
+}
+

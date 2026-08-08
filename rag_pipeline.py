@@ -2,6 +2,7 @@ import time
 import os
 import re
 from glob import glob
+import shutil
 
 from dotenv import load_dotenv
 from groq import Groq
@@ -46,34 +47,36 @@ def load_documents(chat_id):
 
     for filename in os.listdir(pdf_folder):
 
-        if not filename.endswith(".pdf"):
+        if not filename.lower().endswith(".pdf"):
             continue
 
-        pdf_path = os.path.join(pdf_folder, filename)
+        pdf_path = os.path.join(
+            pdf_folder,
+            filename
+        )
 
         try:
 
             pdf = fitz.open(pdf_path)
 
-            full_text = ""
-
             for page_num, page in enumerate(pdf):
 
-                text = page.get_text()
+                text = page.get_text().strip()
 
-                full_text += f"\n\n--- Page {page_num + 1} ---\n\n{text}"
+                if not text:
+                    continue
+
+                docs.append(
+                    Document(
+                        page_content=text,
+                        metadata={
+                            "source": filename,
+                            "page": page_num + 1
+                        }
+                    )
+                )
 
             pdf.close()
-
-            docs.append(
-                Document(
-                    page_content=full_text,
-                    metadata={
-                        "source": filename,
-                        "page": 1
-                    }
-                )
-            )
 
         except Exception as e:
 
@@ -93,8 +96,8 @@ def load_vectorstore(chat_id):
     )
 
     if not os.path.exists(vectorstore_path):
-
         return None
+
     vectorstore = FAISS.load_local(
         vectorstore_path,
         embeddings,
@@ -115,8 +118,8 @@ def create_retriever(chat_id):
     docs = load_documents(chat_id)
 
     if not docs:
-
         return None
+        
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1200,
@@ -322,8 +325,7 @@ def generate_answer(question, chat_history, chat_id):
         )
 
         answer = response.choices[0].message.content
-        print("RAW ANSWER:", repr(answer))
-    
+        
         import re
 
         answer = re.sub(
@@ -342,7 +344,6 @@ def generate_answer(question, chat_history, chat_id):
             )
 
         answer = answer.strip()
-        print("CLEANED ANSWER:", repr(answer))
 
 
         metrics["llm_ms"] = round(
@@ -396,6 +397,8 @@ def generate_answer(question, chat_history, chat_id):
 
 def rebuild_vectorstore(chat_id):
 
+    global retriever_cache
+    
     docs = load_documents(chat_id)
 
     pdf_count = len(glob(os.path.join(
@@ -409,6 +412,22 @@ def rebuild_vectorstore(chat_id):
 
     if not docs:
 
+        vectorstore_path = os.path.join(
+            "storage",
+            chat_id,
+            "vectorstore"
+        )
+
+        if os.path.exists(vectorstore_path):
+
+            shutil.rmtree(vectorstore_path)
+
+        if chat_id in retriever_cache:
+            del retriever_cache[chat_id]
+
+        if chat_id in stats_cache:
+            del stats_cache[chat_id]
+
         return False
 
     text_splitter = RecursiveCharacterTextSplitter(
@@ -417,6 +436,7 @@ def rebuild_vectorstore(chat_id):
     )
  
     split_docs = text_splitter.split_documents(docs)
+    
 
     chunk_count = len(split_docs)
 
@@ -428,7 +448,6 @@ def rebuild_vectorstore(chat_id):
         "vectorstore"
     )
 
-    import shutil
 
     if os.path.exists(vectorstore_path):
 
@@ -439,17 +458,12 @@ def rebuild_vectorstore(chat_id):
         embeddings
     )
 
-    
-    
     vectorstore.save_local(
         vectorstore_path
     )
-    
-    global retriever_cache
 
     if chat_id in retriever_cache:
         del retriever_cache[chat_id]
-
 
     stats_cache[chat_id] = {
        "pdf_count": pdf_count,
@@ -457,3 +471,38 @@ def rebuild_vectorstore(chat_id):
        "chunk_count": chunk_count
     }
     return True
+
+def generate_chat_title(question):
+
+    prompt = f"""
+Generate a concise chat title.
+
+Rules:
+- Maximum 4 words.
+- Return ONLY the title.
+- No quotes.
+- No punctuation.
+- Title Case.
+
+Question:
+{question}
+"""
+
+    try:
+
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0
+        )
+
+        return response.choices[0].message.content.strip()
+
+    except:
+
+        return question[:30]
