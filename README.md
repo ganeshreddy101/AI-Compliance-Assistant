@@ -34,25 +34,33 @@ The application supports **multiple independent chat sessions**, allowing users 
 
 ### 🏠 Main Dashboard
 
-![Main Dashboard](images/main.png)
+<p align="center">
+    <img src="images/main.png" width="900">
+</p>
 
 ---
 
 ### 📑 Empty State
 
-![Empty State](images/empty-state.png)
+<p align="center">
+    <img src="images/empty-state.png" width="900">
+</p>
 
 ---
 
 ### 📚 Retrieved Evidence
 
-![Retrieved Evidence](images/retrieved-evidence.png)
+<p align="center">
+    <img src="images/retrieved-evidence.png" width="900">
+</p>
 
 ---
 
 ### 📊 Performance Metrics
 
-![Performance Metrics](images/performance-metrics.png)
+<p align="center">
+    <img src="images/performance-metrics.png" width="900">
+</p>
 
 ---
 
