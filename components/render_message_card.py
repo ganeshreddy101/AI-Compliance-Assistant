@@ -1,6 +1,7 @@
 import os
 import streamlit as st
 
+from components.copy_button import copy_button
 
 def render_message_card(message):
 
@@ -75,7 +76,10 @@ font-size:24px;
             with header_right:
 
                 if not is_user:
-                    st.write("📋")
+
+                    copy_button(
+                        message["content"]
+                    )
                     
             st.markdown(
                 f"""
@@ -115,56 +119,38 @@ font-size:24px;
                         filename = os.path.basename(chunk["file"])
                         page = chunk["page"]
 
-                        with st.container(border=True):
+                        with st.container():
 
-                           left = st.container()
+                            st.markdown(
+                                f"**{i}. 📄 {filename}**"
+                            )
 
-                           with left:
+                            st.caption(
+                                f"Page {page}"
+                            )
 
-                              st.markdown(
-                                  f"""
-                    <div style="
-                    font-size:15px;
-                    font-weight:600;
-                    color:#ECECEC;
-                    margin-bottom:6px;
-                    ">
-                    {i}. 📄 {filename}
-                    </div>
-
-                    <div style="
-                    font-size:13px;
-                    color:#A8A8A8;
-                    ">
-                    Page {page}
-                    </div>
-                    """,
-                                unsafe_allow_html=True
+                            st.markdown(
+                                f"""
+                        <div style="
+                        margin-top:12px;
+                        padding:12px;
+                        background:#111318;
+                        border:1px solid #2C313C;
+                        border-radius:10px;
+                        font-size:14px;
+                        line-height:1.6;
+                        color:#CFCFCF;
+                        ">
+                        {chunk["content"][:350]}...
+                        </div>
+                        """,
+                                unsafe_allow_html=True,
                             )
 
                         st.markdown(
-                            f"""
-                    <div style="
-                    margin-top:10px;
-                    padding:12px;
-                    background:#111318;
-                    border:1px solid #2C313C;
-                    border-radius:10px;
-                    font-size:14px;
-                    line-height:1.6;
-                    color:#CFCFCF;
-                    ">
-                    {chunk["content"][:350]}...
-                    </div>
-                    """,
-                            unsafe_allow_html=True
+                            "<div style='height:10px'></div>",
+                            unsafe_allow_html=True,
                         )
-
-                        st.markdown(
-                            "<div style='height:12px'></div>",
-                            unsafe_allow_html=True
-                        )
-
         # ---------------- Performance Metrics ----------------
 
         if not is_user:

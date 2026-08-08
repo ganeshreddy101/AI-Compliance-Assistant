@@ -198,6 +198,9 @@ def render_sidebar():
 
                         delete_chat_and_data(chat_id)
 
+                        st.session_state.open_chat_menu = None
+                        st.session_state.editing_chat = None
+
                         shutil.rmtree(
                                os.path.join(
                                   "storage",
@@ -219,6 +222,8 @@ def render_sidebar():
                             create_chat("chat_001")
 
                             handle_chat_switch("chat_001")
+
+                        st.rerun()
 
                 if st.session_state.editing_chat == chat_id:
 
@@ -394,41 +399,19 @@ col1, col2, col3 = st.columns([1, 8, 1])
 
 with col2:
 
-    st.markdown(
-        """
-        <div style="text-align:center; padding-top:10px;">
-
-        <h1 style="
-            margin-bottom:5px;
-            font-size:48px;
-            font-weight:700;
-        ">
-        🤖 AI Compliance Assistant
-        </h1>
-
-        <p style="
-            color:#9CA3AF;
-            font-size:18px;
-        ">
-        AI-Powered Compliance Intelligence
-        </p>
-        
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.title("🤖 AI Compliance Assistant")
 
     st.markdown(
         """
         <style>
 
-        section[data-testid="stSidebar"] > div:first-child {
-            padding-top: 0rem !important;
+        section[data-testid="stSidebar"] > div:first-child{
+            padding-top:0rem !important;
         }
 
         </style>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
 st.divider()
@@ -565,13 +548,37 @@ stroke-linejoin="round">
     )
 
 
-
 with chat_container:
 
-    for message in st.session_state.messages:
+    if not st.session_state.messages:
+                
+                        st.markdown("<br>", unsafe_allow_html=True)
 
-        render_message_card(message)
+                        left, content, right = st.columns([1.2, 2.8, 2.0])
 
+                        with content:
+                            st.subheader("📄 No documents uploaded")
+
+                            st.caption(
+                                "Upload one or more PDF documents to start exploring compliance insights."
+                            )
+
+                            st.markdown("")
+
+                            st.markdown("#### 💡 Try asking")
+
+                            st.markdown("""
+                - Summarize this document
+                - What are the key compliance requirements?
+                - Which sections mention AI risk management?
+                - Compare this document with another uploaded PDF
+                """)
+
+    else:
+
+        for message in st.session_state.messages:
+
+            render_message_card(message)
 
 # ---------------- Chat Input ----------------
 
@@ -656,11 +663,13 @@ if chat_data:
         f"{msg['role']}: {msg['content']}\n"
     )
 
-    response = generate_answer(
-      question,
-      chat_history,
-      st.session_state.chat_id
-    )
+    with st.spinner("🔍 Searching documents..."):
+
+        response = generate_answer(
+            question,
+            chat_history,
+            st.session_state.chat_id
+        )
 
 
     answer = response["answer"]
