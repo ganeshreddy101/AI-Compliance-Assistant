@@ -571,7 +571,6 @@ with chat_container:
                 - Summarize this document
                 - What are the key compliance requirements?
                 - Which sections mention AI risk management?
-                - Compare this document with another uploaded PDF
                 """)
 
     else:
