@@ -7,21 +7,25 @@ A **Multi-PDF Retrieval-Augmented Generation (RAG) application** that enables us
 The application supports **multiple independent chat sessions**, allowing users to upload different PDF collections into separate conversations while maintaining isolated vector databases and chat histories.
 
 ---
-
 ## 🚀 Features
 
 - 💬 Multiple independent chat sessions
+- ✏️ Rename chat conversations
+- 🗑️ Delete chat sessions
+- 🔍 Search chat history
 - 📄 Multi-PDF document support
+- 📂 Per-chat document management
+- 🗑️ Delete uploaded PDFs with automatic vectorstore rebuilding
 - 🔍 Hybrid Search (FAISS + BM25)
 - 🎯 CrossEncoder reranking
 - 🤖 Groq LLM integration
 - 📝 Automatic conversation titles
-- 🗑️ Delete chats
-- 📂 Delete uploaded PDFs with automatic vectorstore rebuilding
-- 📑 Retrieved chunk visualization
+- 📑 Retrieved Evidence viewer
 - 📚 Source citation support
-- ⚡ Fast retrieval using cached retrievers
+- 📋 One-click copy responses
+- ⏳ Loading indicator during retrieval
 - 💾 SQLite chat history
+- 🌙 Modern responsive dark UI
 - 🌐 Cross-platform support (Windows & macOS)
 
 ---
@@ -33,17 +37,26 @@ The application supports **multiple independent chat sessions**, allowing users 
 The main interface demonstrating multi-chat support, PDF management, and AI-generated responses.
 
 <p align="center">
-  <img src="images/main_dashboard.png" width="900">
+  <img src="images/Main.png" width="900">
 </p>
 
 ---
+
+### 📑 Empty State
+
+Upload one or more PDF documents to start asking compliance questions and receive grounded, source-backed answers.
+
+<p align="center">
+  <img src="images/Empty State.png" width="900">
+</p>
+
 
 ### 📚 Retrieved Evidence
 
 Displays the supporting document chunks retrieved by the Hybrid RAG pipeline before answer generation.
 
 <p align="center">
-  <img src="images/retrieved_evidence.png" width="900">
+  <img src="images/Retrieved Evidence.png" width="900">
 </p>
 
 ---
@@ -53,7 +66,7 @@ Displays the supporting document chunks retrieved by the Hybrid RAG pipeline bef
 Shows retrieval statistics and execution metrics to help evaluate system performance.
 
 <p align="center">
-  <img src="images/performance_metrics.png" width="900">
+  <img src="images/Performance Metrics.png" width="900">
 </p>
 
 ---
@@ -143,16 +156,23 @@ Shows retrieval statistics and execution metrics to help evaluate system perform
 
 ```text
 AI-Compliance-Assistant/
-│
+
 ├── app.py
 ├── database.py
 ├── rag_pipeline.py
 ├── requirements.txt
 ├── .env.example
-├── .gitignore
+│
+├── components/
+│   ├── render_message_card.py
+│   └── copy_button.py
+│
+├── styles/
+│   └── theme.css
+│
+├── storage/
 │
 ├── notebooks/
-│   └── Genai_doc_retriever.ipynb
 │
 └── tests/
 ```
