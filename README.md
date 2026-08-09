@@ -2,6 +2,8 @@
 
 **Streamlit App:** https://ai-compliance-assistant-rag.streamlit.app
 
+---
+
 # 🤖 AI Compliance Assistant
 
 **Compliance teams** waste hours manually searching through dense regulatory documents like NIST AI RMF, OECD AI Principles, and government executive orders. This tool lets them ask questions in plain English and get accurate, cited answers in seconds — across multiple documents simultaneously.
