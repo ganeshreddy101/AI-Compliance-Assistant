@@ -85,10 +85,10 @@ The application supports **multiple independent chat sessions**, allowing users 
                                      PyMuPDF Text Extraction
                                                 │
                                                 ▼
-                                  Recursive Text Chunking
+                                     Recursive Text Chunking
                                                 │
                                                 ▼
-                          HuggingFace Embeddings (MiniLM)
+                                 HuggingFace Embeddings (MiniLM)
                                                 │
                            ┌────────────────────┴────────────────────┐
                            ▼                                         ▼
