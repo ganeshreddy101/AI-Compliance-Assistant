@@ -258,16 +258,27 @@ streamlit run app.py
    multi-user scalability.
    
 
+
+
+
 🗂️ Persistent Vector Database:
 
    Vector stores currently rebuild per session. Switching to Pinecone or
    Weaviate would enable persistence, faster startup, and shared indexes.
+
+
+   
    
 
-📑 Citation-Aware Responses
+📑 Citation-Aware Responses:
 
    Responses currently show retrieved chunks separately. Next step is
    inline citations within the answer itself (e.g., [NIST AI RMF, p.12]).
+   
+
+
+
+   
 
 🖼️ OCR for Scanned PDFs:
 
@@ -275,11 +286,17 @@ streamlit run app.py
    would support scanned compliance documents common in legal workflows.
    
 
+
+
+
 📊 Compliance Document Comparison:
 
    Enable side-by-side querying across frameworks (e.g., "How does NIST
    handle bias vs. OECD?") with structured diff output.
    
+
+
+
 
 📊 RAGAS Evaluation Integration:
 
@@ -288,11 +305,17 @@ streamlit run app.py
    the current LLM-as-Judge approach with quantitative benchmarks.
    
 
+
+
+
 🔐 User Authentication:
 
    Multi-session support exists but is not user-gated. Adding OAuth2
    (Google/Microsoft SSO) would make this enterprise-ready.
    
+
+
+
    
 ---
 
