@@ -80,7 +80,7 @@ The application supports **multiple independent chat sessions**, allowing users 
          │                                       │
          ▼                                       ▼
   Chat Management                         PDF Upload
- (SQLite Database)                             │
+ (SQLite Database)                              │
                                                 ▼
                                      PyMuPDF Text Extraction
                                                 │
@@ -94,7 +94,7 @@ The application supports **multiple independent chat sessions**, allowing users 
                            ▼                                         ▼
                     FAISS Vector Store                        BM25 Index
                            │                                         │
-                           └────────────── Hybrid Retrieval ──────────┘
+                           └────────────── Hybrid Retrieval ─────────┘
                                               │
                                               ▼
                                   Cross-Encoder Re-ranking
