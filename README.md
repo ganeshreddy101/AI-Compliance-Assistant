@@ -76,10 +76,10 @@ The application supports **multiple independent chat sessions**, allowing users 
                              ▼
                     Streamlit Frontend
                              │
-         ┌───────────────────┴───────────────────┐
-         │                                       │
-         ▼                                       ▼
-  Chat Management                         PDF Upload
+         ┌───────────────────┴──────────────────┐
+         │                                      │
+         ▼                                      ▼
+  Chat Management                          PDF Upload
  (SQLite Database)                              │
                                                 ▼
                                      PyMuPDF Text Extraction
@@ -94,18 +94,18 @@ The application supports **multiple independent chat sessions**, allowing users 
                            ▼                                         ▼
                     FAISS Vector Store                        BM25 Index
                            │                                         │
-                           └────────────── Hybrid Retrieval ─────────┘
-                                              │
-                                              ▼
-                                  Cross-Encoder Re-ranking
-                                              │
-                                              ▼
-                                  Conversation Memory
-                                              │
-                                              ▼
-                                  Llama 3.3 (Groq API)
-                                              │
-                     ┌────────────────────────┴────────────────────────┐
+                           └───────────── Hybrid Retrieval ──────────┘
+                                                │
+                                                ▼
+                                    Cross-Encoder Re-ranking
+                                                │
+                                                ▼
+                                    Conversation Memory
+                                                │
+                                                ▼
+                                    Llama 3.3 (Groq API)
+                                                │
+                     ┌──────────────────────────┴──────────────────────┐
                      ▼                                                 ▼
              AI Generated Answer                         Retrieved Evidence
                                                           + Performance Metrics
