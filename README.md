@@ -253,7 +253,7 @@ streamlit run app.py
 
 ☁️ Cloud Deployment (AWS/Azure):
 
-   Currently hosted on Streamlit Community Cloud. Production deployment
+   - Currently hosted on Streamlit Community Cloud. Production deployment
    would use containerized FastAPI backend + managed vector store for
    multi-user scalability.
    
@@ -263,7 +263,7 @@ streamlit run app.py
 
 🗂️ Persistent Vector Database:
 
-   Vector stores currently rebuild per session. Switching to Pinecone or
+   - Vector stores currently rebuild per session. Switching to Pinecone or
    Weaviate would enable persistence, faster startup, and shared indexes.
 
 
@@ -272,7 +272,7 @@ streamlit run app.py
 
 📑 Citation-Aware Responses:
 
-   Responses currently show retrieved chunks separately. Next step is
+   - Responses currently show retrieved chunks separately. Next step is
    inline citations within the answer itself (e.g., [NIST AI RMF, p.12]).
    
 
@@ -282,7 +282,7 @@ streamlit run app.py
 
 🖼️ OCR for Scanned PDFs:
 
-   PyMuPDF handles text-native PDFs well. Adding Tesseract/AWS Textract
+   - PyMuPDF handles text-native PDFs well. Adding Tesseract/AWS Textract
    would support scanned compliance documents common in legal workflows.
    
 
