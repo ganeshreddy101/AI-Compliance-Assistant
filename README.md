@@ -259,8 +259,6 @@ streamlit run app.py
    
 
 
-
-
 🗂️ Persistent Vector Database:
 
    - Vector stores currently rebuild per session. Switching to Pinecone or
@@ -268,13 +266,11 @@ streamlit run app.py
 
 
    
-   
 
 📑 Citation-Aware Responses:
 
    - Responses currently show retrieved chunks separately. Next step is
    inline citations within the answer itself (e.g., [NIST AI RMF, p.12]).
-   
 
 
 
@@ -284,37 +280,30 @@ streamlit run app.py
 
    - PyMuPDF handles text-native PDFs well. Adding Tesseract/AWS Textract
    would support scanned compliance documents common in legal workflows.
-   
 
 
 
 
 📊 Compliance Document Comparison:
 
-   Enable side-by-side querying across frameworks (e.g., "How does NIST
+   - Enable side-by-side querying across frameworks (e.g., "How does NIST
    handle bias vs. OECD?") with structured diff output.
    
 
 
-
-
 📊 RAGAS Evaluation Integration:
 
-   Upgrade evaluation pipeline with automated RAGAS metrics — context
+   - Upgrade evaluation pipeline with automated RAGAS metrics — context
    precision, answer relevancy, and faithfulness scoring — replacing
    the current LLM-as-Judge approach with quantitative benchmarks.
    
 
 
-
-
 🔐 User Authentication:
 
-   Multi-session support exists but is not user-gated. Adding OAuth2
+   - Multi-session support exists but is not user-gated. Adding OAuth2
    (Google/Microsoft SSO) would make this enterprise-ready.
    
-
-
 
    
 ---
