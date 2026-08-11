@@ -1,10 +1,8 @@
-## 🚀 Live Demo
+## 🚀 🤖 AI Compliance Assistant Live Demo
 
 **Streamlit App:** https://ai-compliance-assistant-rag.streamlit.app
 
 ---
-
-# 🤖 AI Compliance Assistant
 
 ## Business Problem
 
