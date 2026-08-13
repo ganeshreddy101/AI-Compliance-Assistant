@@ -10,7 +10,6 @@ def get_connection():
         check_same_thread=False
     )
 
-    conn.execute("PRAGMA journal_mode=WAL;")
     conn.execute("PRAGMA foreign_keys=ON;")
 
     return conn
